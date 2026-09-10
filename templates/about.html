@@ -1,20 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+{% extends "base.html" %}
 
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% block title %}
+About
+{% endblock %}
 
-    <title>About</title>
+{% block content %}
 
-</head>
+    <h1>About This App</h1>
 
-<body>
+    <p>
+        This note-taking web app is being built with Python, Flask,
+        HTML, Bootstrap, and Jinja2.
+    </p>
 
-    <a href="/">Home</a> | 
-    <a href="/notes">Notes</a> | 
-    <a href="/about">About</a>
-    
-</body>
-
-</html>
+{% endblock %}

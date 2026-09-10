@@ -10,7 +10,26 @@ def home():
 
 @app.route("/notes")
 def notes():
-    return render_template("notes.html")
+
+    notes_data = [
+        {
+            "id": 1,
+            "title": "My First Note",
+            "content": "This is my first note in the Flask application."
+        },
+        {
+            "id": 2,
+            "title": "Learning Flask",
+            "content": "Today I learned about routes and templates."
+        },
+        {
+            "id": 3,
+            "title": "Project Ideas",
+            "content": "Build a useful note-taking application."
+        }
+    ]
+
+    return render_template("notes.html", notes=notes_data)
 
 @app.route("/about")
 def about():
