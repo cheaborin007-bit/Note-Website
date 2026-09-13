@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, abort
 
 app = Flask(__name__)
 
@@ -51,6 +51,21 @@ def create_note():
         return redirect(url_for("notes"))
 
     return render_template("create_note.html")
+
+
+@app.route("/notes/<int:note_id>")
+def view_note(note_id):
+    selected_note = None
+
+    for note in notes_data:
+        if note["id"] == note_id:
+            selected_note = note
+            break
+
+    if selected_note is None:
+        abort(404)
+
+    return render_template("view_note.html", note=selected_note)
        
 
 if __name__ == "__main__":
