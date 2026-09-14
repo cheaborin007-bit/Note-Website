@@ -94,6 +94,17 @@ def edit_note(note_id):
 
     return render_template("edit_note.html", note=note)
 
+@app.route("/notes/<int:note_id>/delete", methods=["POST"])
+def delete_note(note_id):
+    note = find_note(note_id)
+
+    if note is None:
+        abort(404)
+
+    notes_data.remove(note)
+
+    return redirect(url_for("notes"))
+
        
 
 if __name__ == "__main__":
