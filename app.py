@@ -21,6 +21,13 @@ notes_data = [
 ]
 
 
+def find_note(note_id):
+    for note in notes_data:
+        if note["id"] == note_id:
+            return note
+    return None
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -55,17 +62,38 @@ def create_note():
 
 @app.route("/notes/<int:note_id>")
 def view_note(note_id):
-    selected_note = None
+    note = find_note(note_id)
 
-    for note in notes_data:
-        if note["id"] == note_id:
-            selected_note = note
-            break
+    if note is None:
+        abort(404)
+    return render_template("view_note.html", note=note)
 
-    if selected_note is None:
+
+@app.route("/notes/<int:note_id>/edit", methods=["GET", "POST"])
+def edit_note(note_id):
+    note = find_note(note_id)
+
+    if note is None:
         abort(404)
 
-    return render_template("view_note.html", note=selected_note)
+    if request.method == "POST":
+        title = request.form["title"]
+        content = request.form["content"]
+
+        if not title.strip() or not content.strip():
+            return render_template(
+                "edit_note.html",
+                note=note,
+                error="Title and content are required."
+            )
+
+        note["title"] = title
+        note["content"] = content
+
+        return redirect(url_for("view_note", note_id=note["id"]))
+
+    return render_template("edit_note.html", note=note)
+
        
 
 if __name__ == "__main__":

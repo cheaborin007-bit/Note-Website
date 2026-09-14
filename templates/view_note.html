@@ -23,6 +23,11 @@
                         {{ note.content }}
                     </p>
 
+                    <a href="{{ url_for('edit_note', note_id=note.id) }}"
+                        class="btn btn-warning">
+                        Edit
+                    </a>
+
                     <a href="{{ url_for('notes') }}"
                        class="btn btn-secondary">
                         Back to Notes
