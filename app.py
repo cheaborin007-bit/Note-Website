@@ -103,7 +103,7 @@ def delete_note(note_id):
 
     notes_data.remove(note)
 
-    return redirect(url_for("notes"))
+    return redirect(url_for("notes 1"))
 
        
 
