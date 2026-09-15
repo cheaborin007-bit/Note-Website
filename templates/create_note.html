@@ -11,6 +11,12 @@ Create Note
                 <div class="card-body">
                     <h1 class="mb-4">Create New Note</h1>
 
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
                     <form method="POST" action="{{ url_for('create_note') }}">
                         <div class="mb-3">
                             <label for="title" class="form-label">

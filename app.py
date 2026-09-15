@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, abort
+from flask import Flask, render_template, request, redirect, url_for, abort, flash
 
 app = Flask(__name__)
+app.secret_key = "your_secret_key"  # Replace with a secure secret សំរាប់រៀនបើ real project មិនសរសេរនៅទីនេះទេ
 
 notes_data = [
         {
@@ -47,6 +48,12 @@ def create_note():
         title = request.form["title"]
         content = request.form["content"]
 
+        if not title.strip() or not content.strip():
+            return render_template(
+                "create_note.html",
+                error="Title and content are required."
+            )
+
         new_note = {
             "id": len(notes_data) + 1,
             "title": title,
@@ -54,6 +61,8 @@ def create_note():
         }
 
         notes_data.append(new_note)
+
+        flash("Note created successfully!", "success")
 
         return redirect(url_for("notes"))
 
@@ -90,6 +99,8 @@ def edit_note(note_id):
         note["title"] = title
         note["content"] = content
 
+        flash("Note updated successfully!", "success")
+
         return redirect(url_for("view_note", note_id=note["id"]))
 
     return render_template("edit_note.html", note=note)
@@ -103,9 +114,11 @@ def delete_note(note_id):
 
     notes_data.remove(note)
 
-    return redirect(url_for("notes 1"))
+    flash("Note deleted successfully!", "success")
 
-       
+    return redirect(url_for("notes"))
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
