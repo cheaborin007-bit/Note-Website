@@ -36,7 +36,25 @@ def home():
 
 @app.route("/notes")
 def notes():
-    return render_template("notes.html", notes=notes_data)
+    search_query = request.args.get("search", "").strip().lower()
+
+    if search_query:
+        filtered_notes = []
+
+        for note in notes_data:
+            title = note["title"].lower()
+            content = note["content"].lower()
+
+            if search_query in title or search_query in content:
+                filtered_notes.append(note)
+    else:
+        filtered_notes = notes_data
+
+    return render_template(
+        "notes.html",
+        notes=filtered_notes,
+        search_query=search_query
+    )
 
 @app.route("/about")
 def about():
