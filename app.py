@@ -77,8 +77,8 @@ def notes():
             """
             SELECT * FROM notes
             WHERE LOWER(title) LIKE ?
-            OR LOWER(content) LIKE ?
-            OR LOWER(category) LIKE ?
+               OR LOWER(content) LIKE ?
+               OR LOWER(category) LIKE ?
             ORDER BY id DESC
             """,
             (
@@ -104,7 +104,6 @@ def notes():
         notes=notes_list,
         search_query=search_query,
         total_notes=total_notes
-
     )
 
 
