@@ -50,6 +50,41 @@ Edit Note
                             required>{{ note.content }}</textarea>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+
+                        <select class="form-select"
+                                id="category"
+                                name="category"
+                                required>
+
+                            <option value="Study"
+                                    {% if note.category == "Study" %}selected{% endif %}>
+                                Study
+                            </option>
+
+                            <option value="Work"
+                                    {% if note.category == "Work" %}selected{% endif %}>
+                                Work
+                            </option>
+
+                            <option value="Personal"
+                                    {% if note.category == "Personal" %}selected{% endif %}>
+                                Personal
+                            </option>
+
+                            <option value="Ideas"
+                                    {% if note.category == "Ideas" %}selected{% endif %}>
+                                Ideas
+                            </option>
+
+                            <option value="General"
+                                    {% if note.category == "General" %}selected{% endif %}>
+                                General
+                            </option>
+                        </select>
+                    </div>
+
                     <button type="submit"
                             class="btn btn-primary">
                         Update Note

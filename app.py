@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, abort, flash
 import sqlite3
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -21,9 +22,27 @@ def init_db():
         CREATE TABLE IF NOT EXISTS notes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
-            content TEXT NOT NULL
+            content TEXT NOT NULL,
+            category TEXT NOT NULL DEFAULT 'General',
+            created_at TEXT NOT NULL
         )
     """)
+
+    columns = connection.execute(
+        "PRAGMA table_info(notes)"
+    ).fetchall()
+
+    column_names = [column["name"] for column in columns]
+
+    if "category" not in column_names:
+        connection.execute(
+            "ALTER TABLE notes ADD COLUMN category TEXT NOT NULL DEFAULT 'General'"
+        )
+
+    if "created_at" not in column_names:
+        connection.execute(
+            "ALTER TABLE notes ADD COLUMN created_at TEXT NOT NULL DEFAULT ''"
+        )
 
     connection.commit()
     connection.close()
@@ -58,22 +77,34 @@ def notes():
             """
             SELECT * FROM notes
             WHERE LOWER(title) LIKE ?
-               OR LOWER(content) LIKE ?
+            OR LOWER(content) LIKE ?
+            OR LOWER(category) LIKE ?
             ORDER BY id DESC
             """,
-            (f"%{search_query}%", f"%{search_query}%")
+            (
+                f"%{search_query}%",
+                f"%{search_query}%",
+                f"%{search_query}%"
+            )
         ).fetchall()
     else:
         notes_list = connection.execute(
             "SELECT * FROM notes ORDER BY id DESC"
         ).fetchall()
 
+    # Count all notes
+    total_notes = connection.execute(
+        "SELECT COUNT(*) AS total FROM notes"
+    ).fetchone()["total"]
+
     connection.close()
 
     return render_template(
         "notes.html",
         notes=notes_list,
-        search_query=search_query
+        search_query=search_query,
+        total_notes=total_notes
+
     )
 
 
@@ -87,18 +118,24 @@ def create_note():
     if request.method == "POST":
         title = request.form["title"].strip()
         content = request.form["content"].strip()
+        category = request.form["category"].strip()
 
-        if not title or not content:
+        if not title or not content or not category:
             return render_template(
                 "create_note.html",
-                error="Title and content are required."
+                error="Title, content, and category are required."
             )
+
+        created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         connection = get_db_connection()
 
         connection.execute(
-            "INSERT INTO notes (title, content) VALUES (?, ?)",
-            (title, content)
+            """
+            INSERT INTO notes (title, content, category, created_at)
+            VALUES (?, ?, ?, ?)
+            """,
+            (title, content, category, created_at)
         )
 
         connection.commit()
@@ -131,12 +168,13 @@ def edit_note(note_id):
     if request.method == "POST":
         title = request.form["title"].strip()
         content = request.form["content"].strip()
+        category = request.form["category"].strip()
 
-        if not title or not content:
+        if not title or not content or not category:
             return render_template(
                 "edit_note.html",
                 note=note,
-                error="Title and content are required."
+                error="Title, content, and category are required."
             )
 
         connection = get_db_connection()
@@ -144,10 +182,10 @@ def edit_note(note_id):
         connection.execute(
             """
             UPDATE notes
-            SET title = ?, content = ?
+            SET title = ?, content = ?, category = ?
             WHERE id = ?
             """,
-            (title, content, note_id)
+            (title, content, category, note_id)
         )
 
         connection.commit()

@@ -18,32 +18,41 @@ Create Note
                     {% endif %}
 
                     <form method="POST" action="{{ url_for('create_note') }}">
-                        <div class="mb-3">
-                            <label for="title" class="form-label">
-                                Title
-                            </label>
 
-                            <input
-                                type="text"
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title</label>
+
+                            <input type="text"
                                 class="form-control"
                                 id="title"
                                 name="title"
-                                placeholder="Enter note title"
                                 required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="content" class="form-label">
-                                Content
-                            </label>
+                            <label for="category" class="form-label">Category</label>
 
-                            <textarea
-                                class="form-control"
-                                id="content"
-                                name="content"
-                                rows="6"
-                                placeholder="Write your note here"
-                                required></textarea>
+                            <select class="form-select"
+                                    id="category"
+                                    name="category"
+                                    required>
+                                <option value="">Choose a category</option>
+                                <option value="Study">Study</option>
+                                <option value="Work">Work</option>
+                                <option value="Personal">Personal</option>
+                                <option value="Ideas">Ideas</option>
+                                <option value="General">General</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="content" class="form-label">Content</label>
+
+                            <textarea class="form-control"
+                                    id="content"
+                                    name="content"
+                                    rows="6"
+                                    required></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -51,7 +60,7 @@ Create Note
                         </button>
 
                         <a href="{{ url_for('notes') }}"
-                           class="btn btn-secondary">
+                        class="btn btn-secondary">
                             Cancel
                         </a>
                     </form>
