@@ -69,33 +69,65 @@ def home():
 @app.route("/notes")
 def notes():
     search_query = request.args.get("search", "").strip().lower()
+    selected_category = request.args.get("category", "").strip()
+    sort_order = request.args.get("sort", "newest")
 
     connection = get_db_connection()
 
+    query = "SELECT * FROM notes WHERE 1=1"
+    parameters = []
+
+    # Search title, content, or category
     if search_query:
-        notes_list = connection.execute(
-            """
-            SELECT * FROM notes
-            WHERE LOWER(title) LIKE ?
-            OR LOWER(content) LIKE ?
-            OR LOWER(category) LIKE ?
-            ORDER BY id DESC
-            """,
-            (
-                f"%{search_query}%",
-                f"%{search_query}%",
-                f"%{search_query}%"
+        query += """
+            AND (
+                LOWER(title) LIKE ?
+                OR LOWER(content) LIKE ?
+                OR LOWER(category) LIKE ?
             )
-        ).fetchall()
+        """
+
+        search_value = f"%{search_query}%"
+        parameters.extend([
+            search_value,
+            search_value,
+            search_value
+        ])
+
+    # Filter by category
+    if selected_category:
+        query += " AND category = ?"
+        parameters.append(selected_category)
+
+    # Sort results
+    if sort_order == "oldest":
+        query += " ORDER BY id ASC"
     else:
-        notes_list = connection.execute(
-            "SELECT * FROM notes ORDER BY id DESC"
-        ).fetchall()
+        query += " ORDER BY id DESC"
+
+    notes_list = connection.execute(
+        query,
+        parameters
+    ).fetchall()
 
     # Count all notes
     total_notes = connection.execute(
         "SELECT COUNT(*) AS total FROM notes"
     ).fetchone()["total"]
+
+    # Count Study notes
+    study_notes = connection.execute(
+        "SELECT COUNT(*) AS total FROM notes WHERE category = ?",
+        ("Study",)
+    ).fetchone()["total"]
+
+    # Count Work notes
+    work_notes = connection.execute(
+        "SELECT COUNT(*) AS total FROM notes WHERE category = ?",
+        ("Work",)
+    ).fetchone()["total"]
+
+    
 
     connection.close()
 
@@ -103,8 +135,11 @@ def notes():
         "notes.html",
         notes=notes_list,
         search_query=search_query,
-        total_notes=total_notes
-
+        selected_category=selected_category,
+        sort_order=sort_order,
+        total_notes=total_notes,
+        study_notes=study_notes,
+        work_notes=work_notes
     )
 
 
