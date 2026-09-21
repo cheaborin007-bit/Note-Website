@@ -43,7 +43,8 @@ def init_db():
         "Work",
         "Personal",
         "Ideas",
-        "General"
+        "General",
+        "Health"
     ]
 
     for category_name in default_categories:
