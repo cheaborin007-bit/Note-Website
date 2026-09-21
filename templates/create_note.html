@@ -1,71 +1,177 @@
+
 {% extends "base.html" %}
+{# IMPORTANT: Reuse the layout from base.html #}
 
 {% block title %}
-Create Note
+    Create Note
 {% endblock %}
+{# IMPORTANT: This replaces the "title" block in base.html #}
+
 
 {% block content %}
+{# IMPORTANT: Everything inside this block goes into base.html's content area #}
+
     <div class="row justify-content-center">
+        <!-- Bootstrap: creates a row and centers the content -->
+
         <div class="col-md-8">
+            <!-- Bootstrap: content takes 8/12 columns on medium+ screens -->
+
             <div class="card">
+                <!-- Bootstrap card component -->
+
                 <div class="card-body">
+
                     <h1 class="mb-4">Create New Note</h1>
+                    <!-- Page heading -->
+
 
                     {% if error %}
+                    {# IMPORTANT: Check whether Flask sent an error message #}
+
                         <div class="alert alert-danger">
                             {{ error }}
+                            <!-- IMPORTANT:
+                                 {{ error }} displays the error sent from Flask
+                            -->
                         </div>
+
                     {% endif %}
+                    {# End of the if condition #}
+
 
                     <form method="POST" action="{{ url_for('create_note') }}">
+                        <!--
+                            IMPORTANT:
+                            method="POST" sends form data to Flask
+
+                            action="{{ url_for('create_note') }}"
+                            sends the form to the create_note() route
+                        -->
+
 
                         <div class="mb-3">
-                            <label for="title" class="form-label">Title</label>
 
-                            <input type="text"
+                            <label for="title" class="form-label">
+                                Title
+                            </label>
+
+                            <input
+                                type="text"
                                 class="form-control"
                                 id="title"
                                 name="title"
-                                required>
+                                required
+                            >
+                            <!--
+                                IMPORTANT:
+                                name="title" is the key Flask uses:
+
+                                request.form["title"]
+                            -->
+
                         </div>
 
-                        <div class="mb-3">
-                            <label for="category" class="form-label">Category</label>
 
-                            <select class="form-select"
-                                    id="category"
-                                    name="category"
-                                    required>
-                                <option value="">Choose a category</option>
-                                <option value="Study">Study</option>
-                                <option value="Work">Work</option>
-                                <option value="Personal">Personal</option>
-                                <option value="Ideas">Ideas</option>
-                                <option value="General">General</option>
+                        <div class="mb-3">
+
+                            <label for="category" class="form-label">
+                                Category
+                            </label>
+
+                            <select
+                                class="form-select"
+                                id="category"
+                                name="category"
+                                required
+                            >
+                                <!--
+                                    IMPORTANT:
+                                    name="category" allows Flask to receive
+                                    the selected category
+                                -->
+
+                                <option value="">
+                                    Choose a category
+                                </option>
+
+
+                                {% for category in categories %}
+                                {# IMPORTANT:
+                                   Loop through categories sent by Flask
+                                #}
+
+                                    <option value="{{ category['name'] }}">
+                                        {{ category['name'] }}
+                                    </option>
+
+                                {% endfor %}
+                                {# End of category loop #}
+
                             </select>
+
                         </div>
+
 
                         <div class="mb-3">
-                            <label for="content" class="form-label">Content</label>
 
-                            <textarea class="form-control"
-                                    id="content"
-                                    name="content"
-                                    rows="6"
-                                    required></textarea>
+                            <label for="content" class="form-label">
+                                Content
+                            </label>
+
+                            <textarea
+                                class="form-control"
+                                id="content"
+                                name="content"
+                                rows="6"
+                                required
+                            ></textarea>
+                            <!--
+                                IMPORTANT:
+                                name="content" allows Flask to receive
+                                the note content
+
+                                Flask gets it with:
+
+                                request.form["content"]
+                            -->
+
                         </div>
 
-                        <button type="submit" class="btn btn-primary">
+
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
                             Save Note
                         </button>
+                        <!--
+                            IMPORTANT:
+                            type="submit" submits the form
+                            → Flask receives a POST request
+                        -->
 
-                        <a href="{{ url_for('notes') }}"
-                        class="btn btn-secondary">
+
+                        <a
+                            href="{{ url_for('notes') }}"
+                            class="btn btn-secondary"
+                        >
                             Cancel
                         </a>
+                        <!--
+                            IMPORTANT:
+                            Cancel does NOT submit the form.
+                            It simply goes to the notes() route.
+                        -->
+
                     </form>
+
                 </div>
             </div>
+
         </div>
     </div>
+
 {% endblock %}
+{# End of the content block #}
+

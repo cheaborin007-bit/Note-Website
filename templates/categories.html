@@ -1,0 +1,152 @@
+
+{% extends "base.html" %}
+{# IMPORTANT:
+   Reuse the common layout from base.html
+#}
+
+
+{% block title %}
+    Categories
+{% endblock %}
+{# IMPORTANT:
+   Sets the page title to "Categories"
+#}
+
+
+{% block content %}
+{# IMPORTANT:
+   Everything inside this block goes into
+   the content block of base.html
+#}
+
+
+<div class="container mt-4">
+    <!--
+        Bootstrap:
+        container = keeps content centered
+        mt-4 = adds margin-top
+    -->
+
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <!--
+            Bootstrap flexbox:
+            justify-content-between = puts items on opposite sides
+            align-items-center = vertically centers them
+            mb-4 = margin-bottom
+        -->
+
+
+        <h1>Categories</h1>
+        <!-- Page heading -->
+
+
+        <a href="{{ url_for('notes') }}"
+           class="btn btn-secondary">
+            Back to Notes
+        </a>
+        <!--
+            IMPORTANT:
+
+            url_for('notes')
+            finds the URL of the notes() Flask route.
+
+            Clicking this link takes the user back
+            to the Notes page.
+        -->
+
+    </div>
+
+
+    {% if categories %}
+    {# IMPORTANT:
+       Check whether the categories list contains data.
+
+       If categories exist → show the list.
+       If there are no categories → show the warning.
+    #}
+
+
+        <div class="list-group">
+            <!-- Bootstrap list-group component -->
+
+
+            {% for category in categories %}
+            {# IMPORTANT:
+               Loop through every category
+            #}
+
+
+                <div class="list-group-item d-flex justify-content-between">
+                    <!--
+                        Bootstrap:
+                        list-group-item = one list item
+                        d-flex = use flexbox
+                        justify-content-between = separate the two sides
+                    -->
+
+
+                    <span>
+                        {{ category['name'] }}
+                    </span>
+                    <!--
+                        IMPORTANT:
+
+                        Display the category name.
+
+                        Example:
+                        Study
+                        Work
+                        Personal
+                    -->
+
+
+                    <span class="badge bg-primary rounded-pill">
+                        {{ loop.index }}
+                    </span>
+                    <!--
+                        IMPORTANT:
+
+                        loop.index is a special Jinja variable.
+
+                        It gives the current loop number:
+
+                        1 → first category
+                        2 → second category
+                        3 → third category
+                        etc.
+                    -->
+
+
+                </div>
+
+
+            {% endfor %}
+            {# End of the category loop #}
+
+
+        </div>
+
+
+    {% else %}
+    {# IMPORTANT:
+       This runs when the categories list is empty.
+    #}
+
+
+        <div class="alert alert-warning">
+            No categories found.
+        </div>
+        <!-- Show a warning message -->
+
+
+    {% endif %}
+    {# End of the if/else condition #}
+
+
+</div>
+
+
+{% endblock %}
+{# End of the content block #}
+

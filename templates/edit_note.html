@@ -1,32 +1,85 @@
+
 {% extends "base.html" %}
+{# IMPORTANT: Reuse the common layout from base.html #}
+
 
 {% block title %}
-Edit Note
+
+    Edit Note
+
 {% endblock %}
+{# IMPORTANT: This replaces the title block in base.html #}
+
 
 {% block content %}
+{# IMPORTANT: This content will appear inside base.html's content block #}
+
 
 <div class="row justify-content-center">
+    <!-- Bootstrap: center the form horizontally -->
+
+
     <div class="col-md-8">
+        <!-- Bootstrap: form uses 8/12 columns on medium+ screens -->
+
 
         <div class="card">
+            <!-- Bootstrap card -->
+
+
             <div class="card-body">
 
-                <h1 class="mb-4">Edit Note</h1>
+
+                <h1 class="mb-4">
+                    Edit Note
+                </h1>
+                <!-- Page heading -->
+
 
                 {% if error %}
-                    <div class="alert alert-danger">
-                        {{ error }}
-                    </div>
-                {% endif %}
+                {# IMPORTANT: Check if Flask sent an error message #}
 
-                <form method="POST"
-                      action="{{ url_for('edit_note', note_id=note.id) }}">
+                    <div class="alert alert-danger">
+
+                        {{ error }}
+                        {# Display the error message #}
+
+                    </div>
+
+                {% endif %}
+                {# End of error check #}
+
+
+                <form
+                    method="POST"
+                    action="{{ url_for('edit_note', note_id=note.id) }}"
+                >
+                    <!--
+                        IMPORTANT:
+
+                        method="POST"
+                        → Sends the updated data to Flask.
+
+                        action="{{ url_for('edit_note', note_id=note.id) }}"
+                        → Sends the form to edit_note().
+
+                        note.id
+                        → Tells Flask WHICH note we want to edit.
+
+                        Example:
+                        /notes/5/edit
+                    -->
+
 
                     <div class="mb-3">
-                        <label for="title" class="form-label">
+
+                        <label
+                            for="title"
+                            class="form-label"
+                        >
                             Title
                         </label>
+
 
                         <input
                             type="text"
@@ -34,66 +87,142 @@ Edit Note
                             id="title"
                             name="title"
                             value="{{ note.title }}"
-                            required>
+                            required
+                        >
+                        <!--
+                            IMPORTANT:
+
+                            name="title"
+                            → Flask receives this as:
+
+                            request.form["title"]
+
+                            value="{{ note.title }}"
+                            → Put the existing note title
+                              into the input.
+
+                            Example:
+                            If note.title = "Learning Flask"
+
+                            The input shows:
+                            Learning Flask
+                        -->
+
                     </div>
 
+
                     <div class="mb-3">
-                        <label for="content" class="form-label">
+
+                        <label
+                            for="content"
+                            class="form-label"
+                        >
                             Content
                         </label>
+
 
                         <textarea
                             class="form-control"
                             id="content"
                             name="content"
                             rows="6"
-                            required>{{ note.content }}</textarea>
+                            required
+                        >{{ note.content }}</textarea>
+                        <!--
+                            IMPORTANT:
+
+                            Existing note content is displayed
+                            inside the textarea.
+
+                            Flask receives it with:
+
+                            request.form["content"]
+                        -->
+
                     </div>
+
 
                     <div class="mb-3">
-                        <label for="category" class="form-label">Category</label>
 
-                        <select class="form-select"
-                                id="category"
-                                name="category"
-                                required>
+                        <label
+                            for="category"
+                            class="form-label"
+                        >
+                            Category
+                        </label>
 
-                            <option value="Study"
-                                    {% if note.category == "Study" %}selected{% endif %}>
-                                Study
-                            </option>
 
-                            <option value="Work"
-                                    {% if note.category == "Work" %}selected{% endif %}>
-                                Work
-                            </option>
+                        <select
+                            class="form-select"
+                            id="category"
+                            name="category"
+                            required
+                        >
+                            <!--
+                                IMPORTANT:
+                                Flask receives the selected category with:
 
-                            <option value="Personal"
-                                    {% if note.category == "Personal" %}selected{% endif %}>
-                                Personal
-                            </option>
+                                request.form["category"]
+                            -->
 
-                            <option value="Ideas"
-                                    {% if note.category == "Ideas" %}selected{% endif %}>
-                                Ideas
-                            </option>
 
-                            <option value="General"
-                                    {% if note.category == "General" %}selected{% endif %}>
-                                General
-                            </option>
+                            {% for category in categories %}
+                            {# IMPORTANT:
+                               Loop through all categories
+                            #}
+
+
+                                <option
+                                    value="{{ category['name'] }}"
+
+                                    {% if category['name'] == note['category'] %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    {{ category['name'] }}
+                                </option>
+
+
+                            {% endfor %}
+                            {# End of category loop #}
+
                         </select>
+
                     </div>
 
-                    <button type="submit"
-                            class="btn btn-primary">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
                         Update Note
                     </button>
+                    <!--
+                        IMPORTANT:
 
-                    <a href="{{ url_for('view_note', note_id=note.id) }}"
-                       class="btn btn-secondary">
+                        type="submit"
+                        → Sends the form to Flask.
+
+                        This triggers the POST part
+                        of your edit_note() route.
+                    -->
+
+
+                    <a
+                        href="{{ url_for('view_note', note_id=note.id) }}"
+                        class="btn btn-secondary"
+                    >
                         Cancel
                     </a>
+                    <!--
+                        IMPORTANT:
+
+                        Cancel does NOT submit the form.
+
+                        It sends the user back to the
+                        current note's view page.
+                    -->
+
 
                 </form>
 
@@ -103,4 +232,7 @@ Edit Note
     </div>
 </div>
 
+
 {% endblock %}
+{# End of content block #}
+

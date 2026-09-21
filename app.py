@@ -18,6 +18,15 @@ def get_db_connection():
 def init_db():
     connection = get_db_connection()
 
+    # Create categories table
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE
+        )
+    """)
+
+    # Create notes table
     connection.execute("""
         CREATE TABLE IF NOT EXISTS notes (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,20 +37,22 @@ def init_db():
         )
     """)
 
-    columns = connection.execute(
-        "PRAGMA table_info(notes)"
-    ).fetchall()
+    # Add default categories
+    default_categories = [
+        "Study",
+        "Work",
+        "Personal",
+        "Ideas",
+        "General"
+    ]
 
-    column_names = [column["name"] for column in columns]
-
-    if "category" not in column_names:
+    for category_name in default_categories:
         connection.execute(
-            "ALTER TABLE notes ADD COLUMN category TEXT NOT NULL DEFAULT 'General'"
-        )
-
-    if "created_at" not in column_names:
-        connection.execute(
-            "ALTER TABLE notes ADD COLUMN created_at TEXT NOT NULL DEFAULT ''"
+            """
+            INSERT OR IGNORE INTO categories (name)
+            VALUES (?)
+            """,
+            (category_name,)
         )
 
     connection.commit()
@@ -59,6 +70,17 @@ def find_note(note_id):
     connection.close()
 
     return note
+
+def get_all_categories():
+    connection = get_db_connection()
+
+    categories = connection.execute(
+        "SELECT * FROM categories ORDER BY name ASC"
+    ).fetchall()
+
+    connection.close()
+
+    return categories
 
 
 @app.route("/")
@@ -147,23 +169,59 @@ def notes():
 def about():
     return render_template("about.html")
 
+@app.route("/categories")
+def categories():
+    category_list = get_all_categories()
+
+    return render_template(
+        "categories.html",
+        categories=category_list
+    )
+
 
 @app.route("/notes/new", methods=["GET", "POST"])
+# Creates the URL /notes/new
+# GET  = show the create-note form
+# POST = receive the submitted form data
+
 def create_note():
+    categories = get_all_categories()
+    # Get all categories from the database
+    # We need these categories to display in the form <select>
+
     if request.method == "POST":
+        # Check if the user submitted the form
+        # This block runs only when the form uses POST
+
         title = request.form["title"].strip()
+        # Get the "title" value from the HTML form
+        # .strip() removes extra spaces from the beginning/end
+
         content = request.form["content"].strip()
+        # Get the note content from the form
+        # .strip() removes unnecessary spaces
+
         category = request.form["category"].strip()
+        # Get the selected category from the form
 
         if not title or not content or not category:
+            # Check whether any required field is empty
+
             return render_template(
                 "create_note.html",
-                error="Title, content, and category are required."
+                error="Title, content, and category are required.",
+                categories=categories
             )
+            # Show the form again with an error message
+            # categories=categories sends the categories back to the template
 
         created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Create the current date/time
+        # Example: 2026-09-21 20:30:15
 
         connection = get_db_connection()
+        # Open a connection to the database
+        # We need this connection to INSERT the new note
 
         connection.execute(
             """
@@ -172,15 +230,34 @@ def create_note():
             """,
             (title, content, category, created_at)
         )
+        # INSERT = add a new row to the notes table
+        #
+        # ? are placeholders for the values
+        # This is safer than putting user input directly into SQL
 
         connection.commit()
+        # SAVE the INSERT operation permanently to the database
+        # Without commit(), the new note may not be saved
+
         connection.close()
+        # Close the database connection
+        # Good practice after finishing database work
 
         flash("Note created successfully!", "success")
+        # Show a success message to the user
+        # Example: "Note created successfully!"
 
         return redirect(url_for("notes"))
+        # Redirect the user to the /notes page
+        # url_for("notes") finds the URL of the notes() route
 
-    return render_template("create_note.html")
+    return render_template(
+        "create_note.html",
+        categories=categories
+    )
+    # If the request is GET:
+    # Show the create_note.html form
+    # Send categories to the template
 
 
 @app.route("/notes/<int:note_id>")
