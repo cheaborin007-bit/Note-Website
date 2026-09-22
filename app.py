@@ -206,10 +206,24 @@ def about():
 
 @app.route("/categories")
 def categories():
-    # ទាញយក categories ទាំងអស់ពី database។
-    category_list = get_all_categories()
+    connection = get_db_connection()
 
-    # បញ្ជូន categories ទៅ template categories.html។
+    category_list = connection.execute(
+        """
+        SELECT
+            categories.id,
+            categories.name,
+            COUNT(notes.id) AS note_count
+        FROM categories
+        LEFT JOIN notes
+            ON notes.category = categories.name
+        GROUP BY categories.id, categories.name
+        ORDER BY categories.name ASC
+        """
+    ).fetchall()
+
+    connection.close()
+
     return render_template(
         "categories.html",
         categories=category_list
