@@ -1,66 +1,128 @@
+
 {% extends "base.html" %}
 
+{# ទំព័រនេះបង្ហាញបញ្ជី notes និង controls សម្រាប់ search, filter, sort។ #}
 {% block title %}Notes{% endblock %}
 
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-4">
+
     <h1>My Notes</h1>
 
     <a href="{{ url_for('create_note') }}"
        class="btn btn-primary">
         + New Note
     </a>
+
 </div>
 
+
+<!-- {{ total_notes }} ជា variable ដែល Flask បញ្ជូនមក សម្រាប់ចំនួន notes សរុប។ -->
 <p class="text-muted">
     Total notes: {{ total_notes }}
 </p>
 
+
+<!-- Bootstrap cards ខាងក្រោមបង្ហាញ statistics របស់ notes។ -->
 <div class="row mb-4">
+
+    <!-- card ទីមួយបង្ហាញចំនួន notes ទាំងអស់។ -->
     <div class="col-md-4">
+
         <div class="card shadow-sm">
+
             <div class="card-body">
-                <h6 class="text-muted">Total Notes</h6>
-                <h2>{{ total_notes }}</h2>
+
+                <h6 class="text-muted">
+                    Total Notes
+                </h6>
+
+                <h2>
+                    {{ total_notes }}
+                </h2>
+
             </div>
+
         </div>
+
     </div>
 
+
+    <!-- card ទីពីរបង្ហាញចំនួន notes ក្នុង category Study។ -->
     <div class="col-md-4">
+
         <div class="card shadow-sm">
+
             <div class="card-body">
-                <h6 class="text-muted">Study Notes</h6>
-                <h2>{{ study_notes }}</h2>
+
+                <h6 class="text-muted">
+                    Study Notes
+                </h6>
+
+                <h2>
+                    {{ study_notes }}
+                </h2>
+
             </div>
+
         </div>
+
     </div>
 
+
+    <!-- card ទីបីបង្ហាញចំនួន notes ក្នុង category Work។ -->
     <div class="col-md-4">
+
         <div class="card shadow-sm">
+
             <div class="card-body">
-                <h6 class="text-muted">Work Notes</h6>
-                <h2>{{ work_notes }}</h2>
+
+                <h6 class="text-muted">
+                    Work Notes
+                </h6>
+
+                <h2>
+                    {{ work_notes }}
+                </h2>
+
             </div>
+
         </div>
+
     </div>
+
 </div>
 
+
+<!-- GET form ដាក់ search/filter/sort ក្នុង URL ដើម្បី Flask អានតាម request.args បាន។ -->
 <form method="GET"
       action="{{ url_for('notes') }}"
       class="row g-2 mb-4">
 
+    <!-- value រក្សា search text ដែលអ្នកប្រើបានវាយបន្ទាប់ពី submit។ -->
     <div class="col-md-4">
-        <input type="text"
-               name="search"
-               class="form-control"
-               placeholder="Search notes..."
-               value="{{ search_query }}">
+
+        <input
+            type="text"
+            name="search"
+            class="form-control"
+            placeholder="Search notes..."
+            value="{{ search_query }}"
+        >
+
     </div>
 
+
+    <!-- Jinja if ដាក់ selected លើ category ដែលអ្នកប្រើកំពុង filter។ -->
     <div class="col-md-3">
-        <select name="category" class="form-select">
-            <option value="">All Categories</option>
+
+        <select name="category"
+                class="form-select">
+
+            <option value="">
+                All Categories
+            </option>
 
             <option value="Study"
                 {% if selected_category == "Study" %}selected{% endif %}>
@@ -86,11 +148,18 @@
                 {% if selected_category == "General" %}selected{% endif %}>
                 General
             </option>
+
         </select>
+
     </div>
 
+
+    <!-- select នេះឱ្យអ្នកប្រើជ្រើសរៀប notes ថ្មីមុន ឬចាស់មុន។ -->
     <div class="col-md-3">
-        <select name="sort" class="form-select">
+
+        <select name="sort"
+                class="form-select">
+
             <option value="newest"
                 {% if sort_order == "newest" %}selected{% endif %}>
                 Newest First
@@ -100,55 +169,110 @@
                 {% if sort_order == "oldest" %}selected{% endif %}>
                 Oldest First
             </option>
+
         </select>
+
     </div>
 
+
+    <!-- submit button ដំណើរការ search, filter និង sort ដែលបានជ្រើស។ -->
     <div class="col-md-2 d-grid">
-        <button type="submit" class="btn btn-primary">
+
+        <button type="submit"
+                class="btn btn-primary">
             Apply
         </button>
 
+    </div>
+
+</form>
+
+
+<!-- បង្ហាញ Clear Filters តែពេលមាន search/filter ឬជ្រើស oldest។ -->
 {% if search_query or selected_category or sort_order == "oldest" %}
+
     <div class="mb-3">
+
         <a href="{{ url_for('notes') }}"
            class="btn btn-sm btn-outline-secondary">
+
             Clear Filters
+
         </a>
+
     </div>
+
 {% endif %}
 
+
+<!-- if ពិនិត្យថា variable notes មាន data មុនពេលបង្កើតបញ្ជី។ -->
 {% if notes %}
+
+    {# for loop បង្កើត card មួយសម្រាប់ note នីមួយៗ។ #}
     {% for note in notes %}
+
         <div class="card mb-3 shadow-sm">
+
             <div class="card-body">
-                <h4>{{ note["title"] }}</h4>
+
+                <h4>
+                    {{ note["title"] }}
+                </h4>
+
 
                 <span class="badge bg-secondary">
+
                     {{ note["category"] }}
+
                 </span>
 
+
                 <p class="text-muted mt-2">
+
                     Created: {{ note["created_at"] }}
+
                 </p>
 
-                <p>{{ note["content"] }}</p>
 
-                <a href="{{ url_for('view_note', note_id=note['id']) }}"
-                   class="btn btn-sm btn-primary">
+                <p>
+                    {{ note["content"] }}
+                </p>
+
+
+                <!-- url_for បង្កើត link ទៅ route view_note ដោយផ្ញើ note id។ -->
+                <a
+                    href="{{ url_for('view_note', note_id=note['id']) }}"
+                    class="btn btn-sm btn-primary"
+                >
                     View
                 </a>
 
-                <a href="{{ url_for('edit_note', note_id=note['id']) }}"
-                   class="btn btn-sm btn-warning">
+
+                <!-- link នេះបើក edit page សម្រាប់ note បច្ចុប្បន្ន។ -->
+                <a
+                    href="{{ url_for('edit_note', note_id=note['id']) }}"
+                    class="btn btn-sm btn-warning"
+                >
                     Edit
                 </a>
+
             </div>
+
         </div>
+
     {% endfor %}
+
+
 {% else %}
+
+    <!-- else បង្ហាញសារនេះនៅពេលគ្មាន notes ដែលត្រូវនឹង search/filter។ -->
     <div class="alert alert-warning">
+
         No notes found.
+
     </div>
+
 {% endif %}
 
 {% endblock %}
+

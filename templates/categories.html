@@ -1,152 +1,160 @@
-
 {% extends "base.html" %}
-{# IMPORTANT:
-   Reuse the common layout from base.html
-#}
 
+{# extends ប្រើ layout រួមពី base.html ដើម្បីមិនចាំបាច់សរសេរ header និង navigation ម្តងទៀត។ #}
 
 {% block title %}
-    Categories
-{% endblock %}
-{# IMPORTANT:
-   Sets the page title to "Categories"
-#}
 
+Categories
+
+{% endblock %}
+
+{# title block កំណត់ចំណងជើង browser សម្រាប់ទំព័រនេះ។ #}
 
 {% block content %}
-{# IMPORTANT:
-   Everything inside this block goes into
-   the content block of base.html
-#}
 
+{# មាតិកាក្នុង content block នេះនឹងបង្ហាញនៅក្នុង <main> របស់ base.html។ #}
 
 <div class="container mt-4">
-    <!--
-        Bootstrap:
-        container = keeps content centered
-        mt-4 = adds margin-top
-    -->
+
+<!--
+    Bootstrap class: container ធ្វើឱ្យមាតិកាកណ្ដាល;
+    mt-4 បន្ថែមចន្លោះខាងលើ។
+-->
 
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <!--
-            Bootstrap flexbox:
-            justify-content-between = puts items on opposite sides
-            align-items-center = vertically centers them
-            mb-4 = margin-bottom
-        -->
+{#
+    div នេះប្រើសម្រាប់រៀបចំ Header របស់ Categories page
+
+    d-flex = Bootstrap flexbox
+    justify-content-between = ដាក់ content នៅឆ្វេង និងស្តាំ
+    align-items-center = តម្រឹម content ឱ្យនៅកណ្តាលតាមបញ្ឈរ
+    mb-4 = បន្ថែម margin ខាងក្រោម
+#}
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    {# បង្ហាញចំណងជើងរបស់ page #}
+    <h1>Categories</h1>
 
 
-        <h1>Categories</h1>
-        <!-- Page heading -->
+    {#
+        div នេះផ្ទុក Buttons/Links
+        ដែលនៅខាងស្តាំនៃ Header
+    #}
+    <div>
 
+        {#
+            Link នេះនាំ user ទៅ Create Category page
 
-        <a href="{{ url_for('notes') }}"
-           class="btn btn-secondary">
-            Back to Notes
+            url_for('create_category')
+            = បង្កើត URL ទៅកាន់ Flask route
+            ដែលមាន function name create_category
+        #}
+        <a href="{{ url_for('create_category') }}"
+           class="btn btn-primary">
+
+            {# Button text សម្រាប់បង្កើត Category ថ្មី #}
+            + New Category
+
         </a>
-        <!--
-            IMPORTANT:
+
+
+        {#
+            Link នេះនាំ user ត្រឡប់ទៅ Notes page
 
             url_for('notes')
-            finds the URL of the notes() Flask route.
+            = បង្កើត URL ទៅ Flask route
+            ដែលមាន function name notes
+        #}
+        <a href="{{ url_for('notes') }}"
+           class="btn btn-secondary">
 
-            Clicking this link takes the user back
-            to the Notes page.
-        -->
+            {# Button text សម្រាប់ត្រឡប់ទៅ Notes #}
+            Back to Notes
+
+        </a>
 
     </div>
-
-
-    {% if categories %}
-    {# IMPORTANT:
-       Check whether the categories list contains data.
-
-       If categories exist → show the list.
-       If there are no categories → show the warning.
-    #}
-
-
-        <div class="list-group">
-            <!-- Bootstrap list-group component -->
-
-
-            {% for category in categories %}
-            {# IMPORTANT:
-               Loop through every category
-            #}
-
-
-                <div class="list-group-item d-flex justify-content-between">
-                    <!--
-                        Bootstrap:
-                        list-group-item = one list item
-                        d-flex = use flexbox
-                        justify-content-between = separate the two sides
-                    -->
-
-
-                    <span>
-                        {{ category['name'] }}
-                    </span>
-                    <!--
-                        IMPORTANT:
-
-                        Display the category name.
-
-                        Example:
-                        Study
-                        Work
-                        Personal
-                    -->
-
-
-                    <span class="badge bg-primary rounded-pill">
-                        {{ loop.index }}
-                    </span>
-                    <!--
-                        IMPORTANT:
-
-                        loop.index is a special Jinja variable.
-
-                        It gives the current loop number:
-
-                        1 → first category
-                        2 → second category
-                        3 → third category
-                        etc.
-                    -->
-
-
-                </div>
-
-
-            {% endfor %}
-            {# End of the category loop #}
-
-
-        </div>
-
-
-    {% else %}
-    {# IMPORTANT:
-       This runs when the categories list is empty.
-    #}
-
-
-        <div class="alert alert-warning">
-            No categories found.
-        </div>
-        <!-- Show a warning message -->
-
-
-    {% endif %}
-    {# End of the if/else condition #}
-
 
 </div>
 
 
-{% endblock %}
-{# End of the content block #}
+{% if categories %}
 
+{# if ពិនិត្យថា variable categories មាន data; បើមាន បង្ហាញ list, បើគ្មាន បង្ហាញ warning។ #}
+
+
+    <div class="list-group">
+
+        <!-- Bootstrap list-group ប្រើសម្រាប់បង្ហាញបញ្ជី categories។ -->
+
+
+        {% for category in categories %}
+
+        {# for loop វិលតាម category នីមួយៗក្នុង list categories។ #}
+
+
+            <div class="list-group-item d-flex justify-content-between">
+
+                <!--
+                    list-group-item ជា item មួយក្នុង list;
+                    d-flex និង justify-content-between បំបែកឈ្មោះ និងលេខទៅសងខាង។
+                -->
+
+
+                <span>
+
+                    {{ category['name'] }}
+
+                </span>
+
+                <!--
+                    {{ category['name'] }} បង្ហាញតម្លៃ name របស់ category បច្ចុប្បន្ន។
+                -->
+
+
+                <span class="badge bg-primary rounded-pill">
+
+                    {{ loop.index }}
+
+                </span>
+
+                <!--
+                    loop.index ជា Jinja variable ពិសេស សម្រាប់លេខលំដាប់ក្នុង for loop
+                    (1 សម្រាប់ item ដំបូង, 2 សម្រាប់ item ទីពីរ...)។
+                -->
+
+
+            </div>
+
+
+        {% endfor %}
+
+        {# បញ្ចប់ for loop របស់ categories។ #}
+
+
+    </div>
+
+
+{% else %}
+
+{# else នេះដំណើរការនៅពេល categories មិនមាន data។ #}
+
+
+    <div class="alert alert-warning">
+
+        No categories found.
+
+    </div>
+
+    <!-- បង្ហាញសារ warning សម្រាប់បញ្ជីទទេ។ -->
+
+
+{% endif %}
+
+{# បញ្ចប់ if/else condition។ #}
+
+</div>
+
+{% endblock %}
+
+{# បញ្ចប់ content block។ #}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{# extends ប្រើ layout រួមពី base.html។ #}
+{% block title %}
+    Create Category
+{% endblock %}
+
+{% block content %}
+
+<!-- container និង Bootstrap grid ដាក់ form នៅកណ្ដាលទំព័រ។ -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <h1 class="mb-4">
+                        Create Category
+                    </h1>
+
+                    <!-- Flask ផ្ញើ variable error មកនៅពេលឈ្មោះទទេ ឬមាន Category ដូចគ្នា។ -->
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
+                    <!-- POST form ផ្ញើ name ទៅ Flask route create_category។ -->
+                    <form
+                        method="POST"
+                        action="{{ url_for('create_category') }}"
+                    >
+                        <div class="mb-3">
+                            <!-- for និង id មានតម្លៃដូចគ្នា ដើម្បីភ្ជាប់ label ជាមួយ input។ -->
+                            <label
+                                for="name"
+                                class="form-label"
+                            >
+                                Category Name
+                            </label>
+
+                            <!-- name="name" គឺជា key ដែល Flask អានតាម request.form["name"]។ -->
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                class="form-control"
+                                placeholder="Enter category name"
+                                required
+                            >
+                        </div>
+
+                        <!-- submit button ផ្ញើ form; Cancel ត្រឡប់ទៅទំព័រ Categories។ -->
+                        <button
+                            type="submit"
+                            class="btn btn-primary"
+                        >
+                            Save Category
+                        </button>
+
+                        <a
+                            href="{{ url_for('categories') }}"
+                            class="btn btn-secondary"
+                        >
+                            Cancel
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

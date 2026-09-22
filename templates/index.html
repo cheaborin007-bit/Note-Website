@@ -1,25 +1,31 @@
+
 {% extends "base.html" %}
 
+{# template នេះប្រើ layout រួមពី base.html។ #}
 {% block title %}
-Home
+    Home
 {% endblock %}
 
 {% block content %}
 
-    <div class="text-center">
+<!-- hero section គឺជាផ្នែកស្វាគមន៍នៅកណ្ដាលទំព័រដើម។ -->
+<div class="text-center">
 
-        <h1 class="display-5">
-            Welcome to My Notes App
-        </h1>
+    <h1 class="display-5">
+        Welcome to My Notes App
+    </h1>
 
-        <p class="lead">
-            Organize your thoughts and ideas in one place.
-        </p>
+    <p class="lead">
+        Organize your thoughts and ideas in one place.
+    </p>
 
-        <a href="/notes" class="btn btn-primary">
-            View My Notes
-        </a>
+    <!-- url_for() បង្កើត URL ទៅ Flask route notes ដោយស្វ័យប្រវត្តិ។ -->
+    <a href="{{ url_for('notes') }}"
+       class="btn btn-primary">
+        View My Notes
+    </a>
 
-    </div>
+</div>
 
 {% endblock %}
+

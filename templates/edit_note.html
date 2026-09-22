@@ -1,76 +1,44 @@
 
 {% extends "base.html" %}
-{# IMPORTANT: Reuse the common layout from base.html #}
 
-
+{# template នេះប្រើ base.html ហើយបង្ហាញ form សម្រាប់កែ note ដែលមានស្រាប់។ #}
 {% block title %}
-
     Edit Note
-
 {% endblock %}
-{# IMPORTANT: This replaces the title block in base.html #}
-
 
 {% block content %}
-{# IMPORTANT: This content will appear inside base.html's content block #}
 
-
+<!-- Bootstrap grid ដាក់ edit form កណ្ដាលទំព័រ។ -->
 <div class="row justify-content-center">
-    <!-- Bootstrap: center the form horizontally -->
-
 
     <div class="col-md-8">
-        <!-- Bootstrap: form uses 8/12 columns on medium+ screens -->
-
 
         <div class="card">
-            <!-- Bootstrap card -->
-
 
             <div class="card-body">
-
 
                 <h1 class="mb-4">
                     Edit Note
                 </h1>
-                <!-- Page heading -->
 
 
+                <!-- បង្ហាញសារ error ប្រសិនបើ Flask បញ្ជូន variable error មក។ -->
                 {% if error %}
-                {# IMPORTANT: Check if Flask sent an error message #}
 
                     <div class="alert alert-danger">
-
                         {{ error }}
-                        {# Display the error message #}
-
                     </div>
 
                 {% endif %}
-                {# End of error check #}
 
 
+                <!-- POST form នេះផ្ញើ data ទៅ route edit_note ជាមួយ note_id របស់ note នេះ។ -->
                 <form
                     method="POST"
                     action="{{ url_for('edit_note', note_id=note.id) }}"
                 >
-                    <!--
-                        IMPORTANT:
 
-                        method="POST"
-                        → Sends the updated data to Flask.
-
-                        action="{{ url_for('edit_note', note_id=note.id) }}"
-                        → Sends the form to edit_note().
-
-                        note.id
-                        → Tells Flask WHICH note we want to edit.
-
-                        Example:
-                        /notes/5/edit
-                    -->
-
-
+                    <!-- value="{{ note.title }}" ដាក់ title ចាស់ក្នុង input ជាមុន។ -->
                     <div class="mb-3">
 
                         <label
@@ -80,7 +48,6 @@
                             Title
                         </label>
 
-
                         <input
                             type="text"
                             class="form-control"
@@ -89,28 +56,11 @@
                             value="{{ note.title }}"
                             required
                         >
-                        <!--
-                            IMPORTANT:
-
-                            name="title"
-                            → Flask receives this as:
-
-                            request.form["title"]
-
-                            value="{{ note.title }}"
-                            → Put the existing note title
-                              into the input.
-
-                            Example:
-                            If note.title = "Learning Flask"
-
-                            The input shows:
-                            Learning Flask
-                        -->
 
                     </div>
 
 
+                    <!-- note.content បង្ហាញ content ចាស់ក្នុង textarea ដើម្បីឱ្យអ្នកប្រើអាចកែបាន។ -->
                     <div class="mb-3">
 
                         <label
@@ -120,7 +70,6 @@
                             Content
                         </label>
 
-
                         <textarea
                             class="form-control"
                             id="content"
@@ -128,20 +77,11 @@
                             rows="6"
                             required
                         >{{ note.content }}</textarea>
-                        <!--
-                            IMPORTANT:
-
-                            Existing note content is displayed
-                            inside the textarea.
-
-                            Flask receives it with:
-
-                            request.form["content"]
-                        -->
 
                     </div>
 
 
+                    <!-- dropdown បង្ហាញ categories ទាំងអស់ និងជ្រើស category ចាស់របស់ note។ -->
                     <div class="mb-3">
 
                         <label
@@ -151,30 +91,19 @@
                             Category
                         </label>
 
-
                         <select
                             class="form-select"
                             id="category"
                             name="category"
                             required
                         >
-                            <!--
-                                IMPORTANT:
-                                Flask receives the selected category with:
-
-                                request.form["category"]
-                            -->
-
+                            <option value="">Choose a category</option>
 
                             {% for category in categories %}
-                            {# IMPORTANT:
-                               Loop through all categories
-                            #}
-
 
                                 <option
                                     value="{{ category['name'] }}"
-
+                                    {# if នេះដាក់ selected លើ option ដែលត្រូវនឹង category បច្ចុប្បន្នរបស់ note។ #}
                                     {% if category['name'] == note['category'] %}
                                         selected
                                     {% endif %}
@@ -182,57 +111,39 @@
                                     {{ category['name'] }}
                                 </option>
 
-
                             {% endfor %}
-                            {# End of category loop #}
 
                         </select>
 
                     </div>
 
 
+                    <!-- submit button ផ្ញើ data ដែលបានកែទៅ server។ -->
                     <button
                         type="submit"
                         class="btn btn-primary"
                     >
                         Update Note
                     </button>
-                    <!--
-                        IMPORTANT:
-
-                        type="submit"
-                        → Sends the form to Flask.
-
-                        This triggers the POST part
-                        of your edit_note() route.
-                    -->
 
 
+                    <!-- Cancel ត្រឡប់ទៅទំព័រមើល note ដោយមិនផ្ញើ form។ -->
                     <a
                         href="{{ url_for('view_note', note_id=note.id) }}"
                         class="btn btn-secondary"
                     >
                         Cancel
                     </a>
-                    <!--
-                        IMPORTANT:
-
-                        Cancel does NOT submit the form.
-
-                        It sends the user back to the
-                        current note's view page.
-                    -->
-
 
                 </form>
 
             </div>
+
         </div>
 
     </div>
+
 </div>
 
-
 {% endblock %}
-{# End of content block #}
 
