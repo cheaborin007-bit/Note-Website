@@ -106,6 +106,19 @@ def get_all_categories():
     return categories
 
 
+def find_category(category_id):
+    connection = get_db_connection()
+
+    category = connection.execute(
+        "SELECT * FROM categories WHERE id = ?",
+        (category_id,)
+    ).fetchone()
+
+    connection.close()
+
+    return category
+
+
 @app.route("/")
 def home():
     # route "/" បង្ហាញទំព័រដើម index.html។
@@ -205,10 +218,24 @@ def about():
 
 @app.route("/categories")
 def categories():
-    # ទាញយក categories ទាំងអស់ពី database។
-    category_list = get_all_categories()
+    connection = get_db_connection()
 
-    # បញ្ជូន categories ទៅ template categories.html។
+    category_list = connection.execute(
+        """
+        SELECT
+            categories.id,
+            categories.name,
+            COUNT(notes.id) AS note_count
+        FROM categories
+        LEFT JOIN notes
+            ON notes.category = categories.name
+        GROUP BY categories.id, categories.name
+        ORDER BY categories.name ASC
+        """
+    ).fetchall()
+
+    connection.close()
+
     return render_template(
         "categories.html",
         categories=category_list
@@ -265,6 +292,106 @@ def create_category():
 
     # GET request បង្ហាញ form ទទេ។
     return render_template("create_category.html")
+
+
+@app.route("/categories/<int:category_id>/edit", methods=["GET", "POST"])
+def edit_category(category_id):
+    category = find_category(category_id)
+
+    if category is None:
+        abort(404)
+
+    if request.method == "POST":
+        name = request.form["name"].strip()
+
+        if not name:
+            return render_template(
+                "edit_category.html",
+                category=category,
+                error="Category name is required."
+            )
+
+        connection = get_db_connection()
+
+        duplicate_category = connection.execute(
+            """
+            SELECT * FROM categories
+            WHERE LOWER(name) = LOWER(?)
+              AND id != ?
+            """,
+            (name, category_id)
+        ).fetchone()
+
+        if duplicate_category:
+            connection.close()
+
+            return render_template(
+                "edit_category.html",
+                category=category,
+                error="Another category with this name already exists."
+            )
+
+        connection.execute(
+            """
+            UPDATE categories
+            SET name = ?
+            WHERE id = ?
+            """,
+            (name, category_id)
+        )
+
+        connection.commit()
+        connection.close()
+
+        flash("Category updated successfully!", "success")
+
+        return redirect(url_for("categories"))
+
+    return render_template(
+        "edit_category.html",
+        category=category
+    )
+
+
+@app.route("/categories/<int:category_id>/delete", methods=["POST"])
+def delete_category(category_id):
+    category = find_category(category_id)
+
+    if category is None:
+        abort(404)
+
+    connection = get_db_connection()
+
+    note_count = connection.execute(
+        """
+        SELECT COUNT(*) AS total
+        FROM notes
+        WHERE category = ?
+        """,
+        (category["name"],)
+    ).fetchone()["total"]
+
+    if note_count > 0:
+        connection.close()
+
+        flash(
+            "This category cannot be deleted because notes still use it.",
+            "danger"
+        )
+
+        return redirect(url_for("categories"))
+
+    connection.execute(
+        "DELETE FROM categories WHERE id = ?",
+        (category_id,)
+    )
+
+    connection.commit()
+    connection.close()
+
+    flash("Category deleted successfully!", "success")
+
+    return redirect(url_for("categories"))
 
 
 @app.route("/notes/new", methods=["GET", "POST"])
