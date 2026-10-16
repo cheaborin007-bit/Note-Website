@@ -541,6 +541,33 @@ def delete_note(note_id):
     return redirect(url_for("notes"))
 
 
+@app.route("/categories/<int:category_id>")
+def view_category(category_id):
+    category = find_category(category_id)
+
+    if category is None:
+        abort(404)
+
+    connection = get_db_connection()
+
+    notes = connection.execute(
+        """
+        SELECT * FROM notes
+        WHERE category = ?
+        ORDER BY id DESC
+        """,
+        (category["name"],)
+    ).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "view_category.html",
+        category=category,
+        notes=notes
+    )
+
+
 if __name__ == "__main__":
     # Block នេះរត់តែពេលចាប់ផ្ដើម file app.py ដោយផ្ទាល់ប៉ុណ្ណោះ។
     init_db()

@@ -100,6 +100,12 @@ Categories
                     </div>
 
                     <div>
+
+                        <a href="{{ url_for('view_category', category_id=category['id']) }}"
+                        class="btn btn-sm btn-outline-primary">
+                            View Notes
+                        </a>
+                        
                         <a href="{{ url_for('edit_category', category_id=category['id']) }}"
                         class="btn btn-sm btn-warning">
                             Edit
