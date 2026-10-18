@@ -15,3 +15,4 @@ for table in ["categories", "notes"]:
         print(column)
 
 connection.close()
+#test exercise
