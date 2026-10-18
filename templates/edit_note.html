@@ -81,13 +81,8 @@
                     </div>
 
 
-                    <!-- dropdown បង្ហាញ categories ទាំងអស់ និងជ្រើស category ចាស់របស់ note។ -->
                     <div class="mb-3">
-
-                        <label
-                            for="category"
-                            class="form-label"
-                        >
+                        <label for="category" class="form-label">
                             Category
                         </label>
 
@@ -97,24 +92,21 @@
                             name="category"
                             required
                         >
-                            <option value="">Choose a category</option>
+                            <option value="">
+                                Choose a category
+                            </option>
 
-                            {% for category in categories %}
-
-                                <option
-                                    value="{{ category['name'] }}"
-                                    {# if នេះដាក់ selected លើ option ដែលត្រូវនឹង category បច្ចុប្បន្នរបស់ note។ #}
-                                    {% if category['name'] == note['category'] %}
-                                        selected
-                                    {% endif %}
-                                >
-                                    {{ category['name'] }}
-                                </option>
-
-                            {% endfor %}
-
+                        {% for category in categories %}
+                            <option
+                                value="{{ category['name'] }}"
+                                {% if category['name']|lower == submitted_category|lower %}
+                                    selected
+                                {% endif %}
+                            >
+                                {{ category['name'] }}
+                            </option>
+                        {% endfor %}
                         </select>
-
                     </div>
 
 

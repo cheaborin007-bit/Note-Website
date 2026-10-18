@@ -54,7 +54,8 @@ def init_db():
         "Work",
         "Personal",
         "Ideas",
-        "General"
+        "General",
+        "Health"
     ]
 
     for category_name in default_categories:
@@ -538,6 +539,33 @@ def delete_note(note_id):
 
     # នាំអ្នកប្រើត្រឡប់ទៅបញ្ជី notes។
     return redirect(url_for("notes"))
+
+
+@app.route("/categories/<int:category_id>")
+def view_category(category_id):
+    category = find_category(category_id)
+
+    if category is None:
+        abort(404)
+
+    connection = get_db_connection()
+
+    notes = connection.execute(
+        """
+        SELECT * FROM notes
+        WHERE category = ?
+        ORDER BY id DESC
+        """,
+        (category["name"],)
+    ).fetchall()
+
+    connection.close()
+
+    return render_template(
+        "view_category.html",
+        category=category,
+        notes=notes
+    )
 
 
 if __name__ == "__main__":
