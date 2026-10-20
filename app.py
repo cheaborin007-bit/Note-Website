@@ -183,17 +183,19 @@ def notes():
         "SELECT COUNT(*) AS total FROM notes"
     ).fetchone()["total"]
 
-    # រាប់តែ notes ដែលមាន category ជា Study។
-    study_notes = connection.execute(
-        "SELECT COUNT(*) AS total FROM notes WHERE category = ?",
-        ("Study",)
-    ).fetchone()["total"]
-
-    # រាប់តែ notes ដែលមាន category ជា Work។
-    work_notes = connection.execute(
-        "SELECT COUNT(*) AS total FROM notes WHERE category = ?",
-        ("Work",)
-    ).fetchone()["total"]
+    # រាប់ចំនួន notes សម្រាប់ category នីមួយៗ។
+    category_stats = connection.execute(
+        """
+        SELECT
+            categories.name,
+            COUNT(notes.id) AS note_count
+        FROM categories
+        LEFT JOIN notes
+            ON notes.category = categories.name
+        GROUP BY categories.id, categories.name
+        ORDER BY categories.name ASC
+        """
+    ).fetchall()
 
     # បិទ database connection មុនបញ្ជូនទំព័រត្រឡប់។
     connection.close()
@@ -206,8 +208,8 @@ def notes():
         selected_category=selected_category,
         sort_order=sort_order,
         total_notes=total_notes,
-        study_notes=study_notes,
-        work_notes=work_notes
+        category_stats=category_stats,
+        categories=get_all_categories()
     )
 
 
@@ -331,6 +333,13 @@ def edit_category(category_id):
                 category=category,
                 error="Another category with this name already exists."
             )
+
+        # Update notes first so they keep the same category after its name changes.
+        # Both updates use the same connection and are committed together.
+        connection.execute(
+            "UPDATE notes SET category = ? WHERE category = ?",
+            (name, category["name"])
+        )
 
         connection.execute(
             """
@@ -477,9 +486,37 @@ def edit_note(note_id):
 
     # នៅពេល form ត្រូវបាន submit, ទទួល data ថ្មីពី request.form។
     if request.method == "POST":
-        title = request.form["title"].strip()
-        content = request.form["content"].strip()
-        category = request.form["category"].strip()
+        title = request.form.get("title", "").strip()
+        content = request.form.get("content", "").strip()
+        category = request.form.get("category", "").strip()
+
+        # រក្សាទុកតម្លៃដែលអ្នកប្រើបានបញ្ចូល ដើម្បីកុំឱ្យបាត់ពេលបង្ហាញ error។
+        note_data = dict(note)
+        note_data.update({
+            "title": title,
+            "content": content,
+            "category": category
+        })
+
+        # ពិនិត្យទិន្នន័យនៅ Server; required ក្នុង HTML មិនគ្រប់គ្រាន់ទេ។
+        valid_category_names = {item["name"] for item in categories}
+        if not title or not content or not category:
+            return render_template(
+                "edit_note.html",
+                note=note_data,
+                categories=categories,
+                submitted_category=category,
+                error="Title, content, and category are required."
+            )
+
+        if category not in valid_category_names:
+            return render_template(
+                "edit_note.html",
+                note=note_data,
+                categories=categories,
+                submitted_category=category,
+                error="Please choose a valid category."
+            )
 
         # បើក connection ដើម្បី update note ក្នុង database។
         connection = get_db_connection()
@@ -508,7 +545,8 @@ def edit_note(note_id):
     return render_template(
         "edit_note.html",
         note=note,
-        categories=categories
+        categories=categories,
+        submitted_category=note["category"]
     )
 
 
@@ -567,9 +605,12 @@ def view_category(category_id):
         notes=notes
     )
 
+#hello
+
 
 if __name__ == "__main__":
     # Block នេះរត់តែពេលចាប់ផ្ដើម file app.py ដោយផ្ទាល់ប៉ុណ្ណោះ។
     init_db()
     # debug=True បង្ហាញ error លម្អិត និង restart server ពេលកែ code (សម្រាប់ development)។
     app.run(debug=True)
+

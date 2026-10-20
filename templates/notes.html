@@ -24,73 +24,33 @@
 </p>
 
 
-<!-- Bootstrap cards ខាងក្រោមបង្ហាញ statistics របស់ notes។ -->
+<!-- Statistics Cards -->
 <div class="row mb-4">
 
-    <!-- card ទីមួយបង្ហាញចំនួន notes ទាំងអស់។ -->
-    <div class="col-md-4">
-
-        <div class="card shadow-sm">
-
+    <!-- Card សម្រាប់ចំនួន Notes សរុប -->
+    <div class="col-md-4 mb-3">
+        <div class="card shadow-sm h-100">
             <div class="card-body">
-
-                <h6 class="text-muted">
-                    Total Notes
-                </h6>
-
-                <h2>
-                    {{ total_notes }}
-                </h2>
-
+                <h6 class="text-muted">Total Notes</h6>
+                <h2>{{ total_notes }}</h2>
             </div>
-
         </div>
-
     </div>
 
+    <!-- បង្កើត Card សម្រាប់ Category នីមួយៗ -->
+    {% for category in category_stats %}
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h6 class="text-muted">
+                        {{ category['name'] }} Notes
+                    </h6>
 
-    <!-- card ទីពីរបង្ហាញចំនួន notes ក្នុង category Study។ -->
-    <div class="col-md-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <h6 class="text-muted">
-                    Study Notes
-                </h6>
-
-                <h2>
-                    {{ study_notes }}
-                </h2>
-
+                    <h2>{{ category['note_count'] }}</h2>
+                </div>
             </div>
-
         </div>
-
-    </div>
-
-
-    <!-- card ទីបីបង្ហាញចំនួន notes ក្នុង category Work។ -->
-    <div class="col-md-4">
-
-        <div class="card shadow-sm">
-
-            <div class="card-body">
-
-                <h6 class="text-muted">
-                    Work Notes
-                </h6>
-
-                <h2>
-                    {{ work_notes }}
-                </h2>
-
-            </div>
-
-        </div>
-
-    </div>
+    {% endfor %}
 
 </div>
 
@@ -124,30 +84,12 @@
                 All Categories
             </option>
 
-            <option value="Study"
-                {% if selected_category == "Study" %}selected{% endif %}>
-                Study
-            </option>
-
-            <option value="Work"
-                {% if selected_category == "Work" %}selected{% endif %}>
-                Work
-            </option>
-
-            <option value="Personal"
-                {% if selected_category == "Personal" %}selected{% endif %}>
-                Personal
-            </option>
-
-            <option value="Ideas"
-                {% if selected_category == "Ideas" %}selected{% endif %}>
-                Ideas
-            </option>
-
-            <option value="General"
-                {% if selected_category == "General" %}selected{% endif %}>
-                General
-            </option>
+            {% for category in categories %}
+                <option value="{{ category['name'] }}"
+                    {% if selected_category == category['name'] %}selected{% endif %}>
+                    {{ category['name'] }}
+                </option>
+            {% endfor %}
 
         </select>
 

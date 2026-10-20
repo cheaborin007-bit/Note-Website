@@ -1,0 +1,9 @@
+
+services:
+  notes-app:
+    build: .
+    container_name: notes-app
+    ports:
+      - "9000:8000"
+    volumes:
+      - .:/app
