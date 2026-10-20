@@ -202,19 +202,84 @@
 
         </div>
 
-    {% endfor %}
 
+    {% endfor %}
 
 {% else %}
 
-    <!-- else បង្ហាញសារនេះនៅពេលគ្មាន notes ដែលត្រូវនឹង search/filter។ -->
+    <!-- បង្ហាញនៅពេលគ្មាន Notes ដែលត្រូវនឹង Search ឬ Filter -->
     <div class="alert alert-warning">
-
         No notes found.
-
     </div>
 
 {% endif %}
 
+
+<!-- Pagination Controls -->
+{% if total_pages > 1 %}
+
+    <nav aria-label="Notes pagination" class="mt-4">
+        <ul class="pagination justify-content-center">
+
+            <!-- Previous Page -->
+            <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+                <a
+                    class="page-link"
+                    href="{{ url_for(
+                        'notes',
+                        page=page-1,
+                        search=search_query,
+                        category=selected_category,
+                        sort=sort_order
+                    ) }}"
+                    {% if page <= 1 %}aria-disabled="true"{% endif %}
+                >
+                    Previous
+                </a>
+            </li>
+
+            <!-- Page Numbers -->
+            {% for p in range(1, total_pages + 1) %}
+
+                <li class="page-item {% if p == page %}active{% endif %}">
+                    <a
+                        class="page-link"
+                        href="{{ url_for(
+                            'notes',
+                            page=p,
+                            search=search_query,
+                            category=selected_category,
+                            sort=sort_order
+                        ) }}"
+                    >
+                        {{ p }}
+                    </a>
+                </li>
+
+            {% endfor %}
+
+            <!-- Next Page -->
+            <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+                <a
+                    class="page-link"
+                    href="{{ url_for(
+                        'notes',
+                        page=page+1,
+                        search=search_query,
+                        category=selected_category,
+                        sort=sort_order
+                    ) }}"
+                    {% if page >= total_pages %}aria-disabled="true"{% endif %}
+                >
+                    Next
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+
+{% endif %}
+
 {% endblock %}
+
 

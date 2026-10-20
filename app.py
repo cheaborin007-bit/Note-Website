@@ -1,6 +1,8 @@
 
 # នាំចូល Flask និង tools ដែលប្រើសម្រាប់បង្កើត web application។
 from flask import Flask, render_template, request, redirect, url_for, abort, flash
+import math
+
 # sqlite3 គឺជា module សម្រាប់ធ្វើការជាមួយ SQLite database។
 import sqlite3
 # datetime ប្រើសម្រាប់យកថ្ងៃ និងម៉ោងបច្ចុប្បន្ន។
@@ -128,20 +130,25 @@ def home():
 
 @app.route("/notes")
 def notes():
-    # request.args អានតម្លៃពី URL ដូចជា /notes?search=python។
-    # strip() ដកចន្លោះខាងមុខ/ក្រោយ និង lower() បម្លែង search ទៅជាអក្សរតូច។
+    # អាន Search, Category Filter និង Sort ពី URL។
     search_query = request.args.get("search", "").strip().lower()
     selected_category = request.args.get("category", "").strip()
     sort_order = request.args.get("sort", "newest")
 
-    # បើក connection ដើម្បីទាញយក notes ពី database។
+    # ចំនួន Notes ក្នុងមួយទំព័រ។
+    per_page = 5
+
+    # អានលេខទំព័រពី URL។
+    page = request.args.get("page", 1, type=int)
+    page = max(page, 1)
+
+    # បើក Database connection។
     connection = get_db_connection()
 
-    # ចាប់ផ្ដើម SQL query ហើយ parameters រក្សាតម្លៃសម្រាប់ placeholders។
+    # បង្កើត SQL Query សម្រាប់ Search និង Filter។
     query = "SELECT * FROM notes WHERE 1=1"
     parameters = []
 
-    # បើមាន search text ស្វែងរកក្នុង title, content ឬ category។
     if search_query:
         query += """
             AND (
@@ -151,39 +158,59 @@ def notes():
             )
         """
 
-        # % មានន័យថាអាចមានអក្សរផ្សេងទៀតនៅមុខ ឬក្រោយ search text។
         search_value = f"%{search_query}%"
 
-        # បន្ថែមតម្លៃដូចគ្នា 3 ដង សម្រាប់ placeholders 3 ក្នុង query។
         parameters.extend([
             search_value,
             search_value,
             search_value
         ])
 
-    # បើអ្នកប្រើជ្រើស category បន្ថែមលក្ខខណ្ឌ filter ទៅក្នុង query។
     if selected_category:
         query += " AND category = ?"
         parameters.append(selected_category)
 
-    # រៀប notes តាម id: oldest គឺចាស់មុន, បើមិនដូច្នោះទេថ្មីមុន។
+    # រាប់ Notes ដែលត្រូវនឹង Search និង Filter។
+    count_query = query.replace(
+        "SELECT *",
+        "SELECT COUNT(*) AS total",
+        1
+    )
+    count_parameters = parameters.copy()
+
+    total_filtered = connection.execute(
+        count_query,
+        count_parameters
+    ).fetchone()["total"]
+
+    # គណនាចំនួនទំព័រ និងកែ page ឱ្យនៅក្នុងចន្លោះត្រឹមត្រូវ។
+    total_pages = max(1, math.ceil(total_filtered / per_page))
+    page = min(page, total_pages)
+
+    # គណនា OFFSET បន្ទាប់ពីកែ page។
+    offset = (page - 1) * per_page
+
+    # រៀប Notes តាមលំដាប់ចាស់ ឬថ្មី។
     if sort_order == "oldest":
         query += " ORDER BY id ASC"
     else:
         query += " ORDER BY id DESC"
 
-    # ដំណើរការ query ហើយ fetchall() យក rows ទាំងអស់ជា list។
+    # ទាញយកតែ Notes សម្រាប់ទំព័របច្ចុប្បន្ន។
+    query += " LIMIT ? OFFSET ?"
+    parameters.extend([per_page, offset])
+
     notes_list = connection.execute(
         query,
         parameters
     ).fetchall()
 
-    # រាប់ចំនួន notes ទាំងអស់សម្រាប់បង្ហាញនៅលើទំព័រ។
+    # រាប់ Notes ទាំងអស់ក្នុង Database ដូចកូដចាស់។
     total_notes = connection.execute(
         "SELECT COUNT(*) AS total FROM notes"
     ).fetchone()["total"]
 
-    # រាប់ចំនួន notes សម្រាប់ category នីមួយៗ។
+    # រាប់ Notes សម្រាប់ Category នីមួយៗ។
     category_stats = connection.execute(
         """
         SELECT
@@ -197,10 +224,10 @@ def notes():
         """
     ).fetchall()
 
-    # បិទ database connection មុនបញ្ជូនទំព័រត្រឡប់។
+    # បិទ Database connection។
     connection.close()
 
-    # បញ្ជូន data ទាំងនេះទៅ template notes.html ដើម្បីបង្ហាញ។
+    # បញ្ជូនទិន្នន័យទៅ notes.html។
     return render_template(
         "notes.html",
         notes=notes_list,
@@ -209,7 +236,9 @@ def notes():
         sort_order=sort_order,
         total_notes=total_notes,
         category_stats=category_stats,
-        categories=get_all_categories()
+        categories=get_all_categories(),
+        page=page,
+        total_pages=total_pages
     )
 
 
@@ -605,7 +634,6 @@ def view_category(category_id):
         notes=notes
     )
 
-#hello
 
 
 if __name__ == "__main__":
